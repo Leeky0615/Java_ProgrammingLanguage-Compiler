@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ProgrammingLanguage_Compiler.iml" filepath="$PROJECT_DIR$/ProgrammingLanguage_Compiler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Java_ProgrammingLanguage-Compiler.iml" filepath="$PROJECT_DIR$/Java_ProgrammingLanguage-Compiler.iml" />
     </modules>
   </component>
 </project>

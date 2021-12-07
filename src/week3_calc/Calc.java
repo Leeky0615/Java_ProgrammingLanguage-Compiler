@@ -1,3 +1,5 @@
+package week3_calc;
+
 import java.io.*;
 
 class Calc {
