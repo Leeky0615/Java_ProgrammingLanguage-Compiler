@@ -21,35 +21,67 @@ class State extends Stack<Pair> {
         push(id, val);
     }
 
-    // (1) Push function Implementation
+    /**
+     * (1) Push function Implementation
+     * 1. 파라미터를 새로운 new Pair로 만들고 넘김
+     * 2. super class(Stack)의 push사용
+     * @param id, val
+     * @return this
+     */
     public State push(Identifier id, Value val) {
         super.push(new Pair(id, val));
         return this;
     }
 
-    // (2) Pop function Implementation (Optional)
+    /**
+     * (2) Pop function Implementation (Optional)
+     * 1. super class(Stack)의 pop 사용.
+     * 2. stack top에 원소 삽입 후 해당 원소 리턴
+     * @return Pair
+     */
     public Pair pop() {
         return super.pop();
     }
 
-    // (3) Lookup function Implementation
-    public int lookup (Identifier v) {
-        for (int i = lastIndexOf(lastElement()); i < 0; i--) {
-            if (get(i).id == v) {
-                return i;
-            }
+    /**
+     * (3) Lookup function Implementation
+     * 1. Stack을 상속 받고 Stack은 Vector를 상속받음.
+     * 2. Stack Top(1)의 실제 인덱스 = this.size()-1 => 반복문 시작
+     * 3. Stack Bottom의 실제 인덱스 = 0 => 반복문 끝
+     * @param id
+     * @return Stack = size()-i <=> (Vector = i) || no value = -1
+     */
+    public int lookup (Identifier id) {
+        for (int i = size()-1; i > -1; i--) {
+            if(elementAt(i).id == id) return size()-i;
         }
         return -1;
     }
 
-    // (4) Set Function Implementation
+    /**
+     * (4) Set Function Implementation
+     * 1. stack top index = size()-1.
+     * 2. vector 클래스의 set 호출
+     * @param id, val
+     * @Return State -> this : 자기자신 리턴
+     */
     public State set(Identifier id, Value val) {
-    	// Set Implementation
+        super.set(size() - 1, new Pair(id, val));
+        return this;
     }
 
-    // (5) Get Function Implementation
+    /**
+     * (5) Get Function Implementation
+     * 1. State의 lookup 호출 -> vector에서의 index = size()-lookup(id)
+     * 2. vector 클래스의 get 호출
+     * 3. 없을 경우 null리턴
+     * @param id
+     * @return value
+     */
     public Value get (Identifier id) {
-    	// Get Implementation
+        int idx = lookup(id);
+        if(idx != -1) return super.get(size()-idx).val;
+        else return null;
     }
 
 

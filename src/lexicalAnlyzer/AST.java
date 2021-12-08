@@ -16,12 +16,13 @@ class Decls extends ArrayList<Decl> {
     Decls() {
         super();
     }
+
     Decls(Decl d) {
         this.add(d);
     }
 }
 
-class Decl extends Command{
+class Decl extends Command {
     // Decl = Type type; Identifier id
     Type type;
     Identifier id;
@@ -51,12 +52,13 @@ class Functions extends ArrayList<Function> {
     Functions() {
         super();
     }
+
     Functions(Function f) {
         this.add(f);
     }
 }
 
-class Function extends Command{
+class Function extends Command {
     // Function = Type type; Identifier id; Decls params; Stmt stmt
     Type type;
     Identifier id;
@@ -111,7 +113,7 @@ class ProtoType extends Type {
     }
 }
 
-abstract class Stmt extends Command{
+abstract class Stmt extends Command {
     // Stmt = Empty | Stmts | Assignment | If  | While | Let | Read | Print
 }
 
@@ -243,7 +245,7 @@ abstract class Expr extends Stmt {
 
 }
 
-class Call extends Expr{
+class Call extends Expr {
     Identifier fid;
     Exprs args;
 
@@ -253,7 +255,7 @@ class Call extends Expr{
     }
 }
 
-class Identifier extends Expr{
+class Identifier extends Expr {
     // Identifier = String id
     private String id;
 
@@ -271,7 +273,7 @@ class Identifier extends Expr{
     }
 }
 
-class Array extends Expr{
+class Array extends Expr {
     // Array = Identifier id; Expr expr
     Identifier id;
     Expr expr = null;
@@ -291,7 +293,7 @@ class Array extends Expr{
     }
 }
 
-class Value extends Expr{
+class Value extends Expr {
     // Value = int | bool | string | array | function 
     protected boolean undef = true;
     Object value = null; // Type type;
@@ -364,7 +366,7 @@ class Value extends Expr{
 }
 
 // (1) Binary AST Implementation
-class Binary extends Expr{
+class Binary extends Expr {
     // Binary = Operator op; Expr expr1; Expr expr2;
     Operator op;
     Expr expr1, expr2;
@@ -377,7 +379,7 @@ class Binary extends Expr{
 }
 
 // (2) Unary AST Implementation
-class Unary extends Expr{
+class Unary extends Expr {
     // Unary = Operator op; Expr expr
     Operator op;
     Expr expr;
