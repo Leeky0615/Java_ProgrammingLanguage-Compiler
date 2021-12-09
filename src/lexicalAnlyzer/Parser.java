@@ -339,7 +339,7 @@ public class Parser {
         Expr expr2 = expr();
         match(RPAREN);
         Stmt stmt = stmt();
-        return new For(decl,);
+        return null;
     }
 
     private Expr expr() {
