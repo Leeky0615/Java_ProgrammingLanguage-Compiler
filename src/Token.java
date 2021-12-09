@@ -1,7 +1,3 @@
-package lexicalAnlyzer;// Token.java
-
-import java.lang.Enum;
-
 enum Token {
      BOOL("bool"),CHAR("char"), ELSE("else"), FALSE("false"), FLOAT("float"), 
      STRING("string"), IF("if"), INT("int"),  TRUE("true"), WHILE("while"), 

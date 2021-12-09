@@ -1,7 +1,6 @@
-package lexicalAnlyzer;// Parser.java
 // Parser for language S
 
-import static lexicalAnlyzer.Token.*;
+import static Token.*;
 
 public class Parser {
     Token token;          // current token 

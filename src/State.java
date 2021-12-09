@@ -1,5 +1,3 @@
-package lexicalAnlyzer;
-
 import java.util.*;
 // State as stack 
 

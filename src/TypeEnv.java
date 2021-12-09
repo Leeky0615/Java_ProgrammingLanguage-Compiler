@@ -1,4 +1,3 @@
-package lexicalAnlyzer;// TypeEnv.java
 // Type environment for S
 import java.util.*;
 

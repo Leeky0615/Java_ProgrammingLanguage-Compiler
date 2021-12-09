@@ -1,4 +1,3 @@
-package lexicalAnlyzer;// AST.java
 // AST for S
 
 import java.util.ArrayList;

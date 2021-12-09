@@ -1,4 +1,3 @@
-package lexicalAnlyzer;// Lexer.java
 // Lexical analyzer for S
 
 import java.io.*;

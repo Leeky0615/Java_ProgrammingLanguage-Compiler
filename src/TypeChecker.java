@@ -1,4 +1,3 @@
-package lexicalAnlyzer;// TypeChecker.java
 // Static type checker for S
 
 public class TypeChecker {

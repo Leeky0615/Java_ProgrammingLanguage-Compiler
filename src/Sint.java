@@ -1,4 +1,3 @@
-package lexicalAnlyzer;// Sint.java
 // Interpreter for S
 import java.util.Scanner;
 
