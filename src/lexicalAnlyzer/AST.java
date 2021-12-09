@@ -6,20 +6,13 @@ import java.util.ArrayList;
 abstract class Command {
     // Command = Decl | Function | Stmt
     Type type = Type.UNDEF;
-
-    public void display(int l) {
-    }
+    public void display(int l) {}
 }
 
 class Decls extends ArrayList<Decl> {
     // Decls = Decl*
-    Decls() {
-        super();
-    }
-
-    Decls(Decl d) {
-        this.add(d);
-    }
+    Decls() {super();}
+    Decls(Decl d) {this.add(d);}
 }
 
 class Decl extends Command {
@@ -27,7 +20,7 @@ class Decl extends Command {
     Type type;
     Identifier id;
     Expr expr = null;
-    int arraysize = 0;
+    int arraySize = 0;
 
     Decl(String s, Type t) {
         id = new Identifier(s);
@@ -37,7 +30,7 @@ class Decl extends Command {
     Decl(String s, Type t, int n) {
         id = new Identifier(s);
         type = t;
-        arraysize = n;
+        arraySize = n;
     } // array declaration 
 
     Decl(String s, Type t, Expr e) {
@@ -49,13 +42,6 @@ class Decl extends Command {
 
 class Functions extends ArrayList<Function> {
     // Functions = Function*
-    Functions() {
-        super();
-    }
-
-    Functions(Function f) {
-        this.add(f);
-    }
 }
 
 class Function extends Command {
@@ -117,13 +103,11 @@ abstract class Stmt extends Command {
     // Stmt = Empty | Stmts | Assignment | If  | While | Let | Read | Print
 }
 
-class Empty extends Stmt {
-
-}
+class Empty extends Stmt {}
 
 class Stmts extends Stmt {
     // Stmts = Stmt*
-    public ArrayList<Stmt> stmts = new ArrayList<Stmt>();
+    public ArrayList<Stmt> stmts = new ArrayList<>();
 
     Stmts() {
         super();
@@ -189,20 +173,14 @@ class Let extends Stmt {
 class Read extends Stmt {
     // Read = Identifier id
     Identifier id;
-
-    public Read(Identifier id) {
-        this.id = id;
-    }
+    public Read(Identifier id) {this.id = id;}
 }
 
 // (8) Print AST Implementation
 class Print extends Stmt {
     // Print =  Expr expr
     Expr expr;
-
-    public Print(Expr e) {
-        this.expr = e;
-    }
+    public Print(Expr e) {this.expr = e;}
 }
 class For extends Stmt {
     // For = Decl decl; Expr expr; Assignment assignment, Stmt stmt
@@ -273,13 +251,9 @@ class Identifier extends Expr {
     // Identifier = String id
     private String id;
 
-    Identifier(String s) {
-        id = s;
-    }
+    Identifier(String s) {id = s;}
 
-    public String toString() {
-        return id;
-    }
+    public String toString() {return id;}
 
     public boolean equals(Object obj) {
         String s = ((Identifier) obj).id;
@@ -292,20 +266,16 @@ class Array extends Expr {
     Identifier id;
     Expr expr = null;
 
-    Array(Type t) {
-        id = t;
-    }
+    Array(Identifier s, Expr e) {id = s; expr = e;}
 
+    public String toString( ) { return id.toString(); }
 
-    public String toString() {
-        return id.toString();
-    }
-
-    public boolean equals(Object obj) {
+    public boolean equals (Object obj) {
         String s = ((Array) obj).id.toString();
         return id.equals(s);
     }
 }
+
 
 class Value extends Expr {
     // Value = int | bool | string | array | function 

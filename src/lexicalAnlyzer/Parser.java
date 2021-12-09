@@ -97,8 +97,7 @@ public class Parser {
         funId = str;
         Function f = new Function(str, t);
         match(LPAREN);
-        if (token != RPAREN)
-            f.params = params();
+        if (token != RPAREN) f.params = params();
         match(RPAREN);
         Stmt s = stmt();
         f.stmt = s;
@@ -222,13 +221,18 @@ public class Parser {
     private Read readStmt() {
         // <readStmt> -> read id;
         match(READ);
-        Read read = read();
+        Identifier id = new Identifier(match(ID));
+        return new Read(id);
     }
 
     //(8) Print Parser Implementation
     private Print printStmt() {
         // <printStmt> -> print <expr>;
         // Print Implementation
+        match(PRINT);
+        Expr e = expr();
+        match(SEMICOLON);
+        return new Print(e);
     }
 
     private Return returnStmt() {
@@ -243,7 +247,11 @@ public class Parser {
     // (3) Assignment Parser Implementation
     private Stmt assignment() {
         // <assignment> -> id = <expr>;
-        // Assignment Implementation
+        Identifier id = new Identifier(match(ID));
+        match(ASSIGN);
+        Expr e = expr();
+        match(SEMICOLON);
+        return new Assignment(id, e);
     }
 
 
@@ -260,7 +268,6 @@ public class Parser {
     // (4) If Parser Implementation
     private If ifStmt() {
         // <ifStmt> -> if (<expr>) then <stmt> [else <stmt>]
-        // If Implementation
         match(IF);
         match(LPAREN);
         Expr e = expr();
@@ -277,7 +284,6 @@ public class Parser {
     // (5) While Parser Implementation
     private While whileStmt() {
         // <whileStmt> -> while (<expr>) <stmt>
-        // While Implementation
         match(WHILE);
         match(LPAREN);
         Expr e = expr();
@@ -432,6 +438,7 @@ public class Parser {
                     match(RBRACKET);
                     e = a;
                 }
+
                 break;
             case NUMBER: case STRLITERAL:
                 e = literal(); break;

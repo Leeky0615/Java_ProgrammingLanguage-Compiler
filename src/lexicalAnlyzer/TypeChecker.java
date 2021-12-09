@@ -29,7 +29,7 @@ public class TypeChecker {
     } 
 
     public static Type Check(Decl decl, TypeEnv te) {
-        if (decl.arraysize == 0 && decl.expr != null) 
+        if (decl.arraySize == 0 && decl.expr != null)
 	    if (decl.type != Check(decl.expr, te))
 	        error(decl, "type error: incorrect initialization to " + decl.id);
         te.push (decl.id, decl.type);
@@ -107,13 +107,36 @@ public class TypeChecker {
         Type t2 = Check(b.expr2, te);
         switch (b.op.val) {
             case "+": case "-": case "*": case "/":
-
+                if(t1==Type.INT && t2==Type.INT) b.type = Type.INT;
+                else error(b, "type error for " + b.op);
+                break;
+            case "<": case "<=":case ">":case ">=":case "==":case "!=":
+                if(t1 == t2) b.type = Type.BOOL;
+                else error(b, "type error for " + b.op);
+                break;
+            case "&": case "|":
+                if(t1==Type.BOOL && t2==Type.BOOL) b.type = Type.BOOL;
+                else error(b, "type error for " + b.op);
+                break;
         }
+        return b.type;
     }
     
     // (2) Unary Type Check Implementation
     static Type Check(Unary u, TypeEnv te) {
-        // Unary Implementation
+        Type t1 = Check(u.expr, te);
+        switch (u.op.val) {
+            case "!":
+                if(t1==Type.BOOL) u.type = Type.BOOL;
+                else error(u, "! has non-bool operand");
+                break;
+            case "-":
+                if(t1==Type.INT) u.type = Type.INT;
+                else error(u, "Unary -has non-int operand");
+                break;
+
+        }
+        return u.type;
     }
     
     

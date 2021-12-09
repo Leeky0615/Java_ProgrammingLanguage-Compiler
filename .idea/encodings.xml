@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/AST.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/Lexer.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/Parser.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/Sint.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/State.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/Token.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/TypeChecker.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/lexicalAnlyzer/TypeEnv.java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>
