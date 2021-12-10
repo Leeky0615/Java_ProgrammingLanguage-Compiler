@@ -5,7 +5,6 @@ import java.util.ArrayList;
 abstract class Command {
     // Command = Decl | Function | Stmt
     Type type = Type.UNDEF;
-    public void display(int l) {}
 }
 
 class Decls extends ArrayList<Decl> {
@@ -16,49 +15,41 @@ class Decls extends ArrayList<Decl> {
 
 class Decl extends Command {
     // Decl = Type type; Identifier id
-    Type type;
     Identifier id;
     Expr expr = null;
     int arraySize = 0;
 
-    Decl(String s, Type t) {
-        id = new Identifier(s);
-        type = t;
-    } // declaration 
+    Decl (String s, Type t) {
+        id = new Identifier(s); type = t;
+    } // declaration
 
-    Decl(String s, Type t, int n) {
-        id = new Identifier(s);
-        type = t;
-        arraySize = n;
-    } // array declaration 
+    Decl (String s, Type t, int n) {
+        id = new Identifier(s); type = t; arraySize = n;
+    } // array declaration
 
-    Decl(String s, Type t, Expr e) {
-        id = new Identifier(s);
-        type = t;
-        expr = e;
+    Decl (String s, Type t, Expr e) {
+        id = new Identifier(s); type = t; expr = e;
     } // declaration 
 }
 
 class Functions extends ArrayList<Function> {
     // Functions = Function*
+    Functions() {super();}
+    Functions(Function f) {this.add(f);}
 }
 
-class Function extends Command {
+class Function extends Command  {
     // Function = Type type; Identifier id; Decls params; Stmt stmt
-    Type type;
     Identifier id;
     Decls params;
     Stmt stmt;
 
     Function(String s, Type t) {
-        id = new Identifier(s);
-        type = t;
-        params = null;
-        stmt = null;
+        id = new Identifier(s); type = t; params = null; stmt = null;
     }
 
-    public String toString() {
-        return id.toString() + params.toString();
+    public String toString ( ) {
+        return id.toString()+params.toString();
     }
 }
 
@@ -76,11 +67,9 @@ class Type {
     final static Type ERROR = new Type("error");
 
     protected String id;
-
     protected Type(String s) {
         id = s;
     }
-
     public String toString() {
         return id;
     }
@@ -90,7 +79,6 @@ class ProtoType extends Type {
     // defines the type of a function and its parameters
     Type result;
     Decls params;
-
     ProtoType(Type t, Decls ds) {
         super(t.id);
         result = t;
@@ -111,7 +99,6 @@ class Stmts extends Stmt {
     Stmts() {
         super();
     }
-
     Stmts(Stmt s) {
         stmts.add(s);
     }
@@ -229,11 +216,12 @@ class Raise extends Stmt {
 
 class Exprs extends ArrayList<Expr> {
     // Exprs = Expr*
+    Exprs() {super();}
+    Exprs(Expr e) {this.add(e);}
 }
 
 abstract class Expr extends Stmt {
     // Expr = Identifier | Value | Binary | Unary | Call
-
 }
 
 class Call extends Expr {
@@ -267,8 +255,7 @@ class Array extends Expr {
 
     Array(Identifier s, Expr e) {id = s; expr = e;}
 
-    public String toString( ) { return id.toString(); }
-
+    public String toString( ) {return id.toString();}
     public boolean equals (Object obj) {
         String s = ((Array) obj).id.toString();
         return id.equals(s);
@@ -304,32 +291,27 @@ class Value extends Expr {
     }
 
     int intValue() {
-        if (value instanceof Integer)
-            return ((Integer) value).intValue();
+        if (value instanceof Integer) return ((Integer) value).intValue();
         else return 0;
     }
 
     boolean boolValue() {
-        if (value instanceof Boolean)
-            return ((Boolean) value).booleanValue();
+        if (value instanceof Boolean) return ((Boolean) value).booleanValue();
         else return false;
     }
 
     String stringValue() {
-        if (value instanceof String)
-            return (String) value;
+        if (value instanceof String) return (String) value;
         else return "";
     }
 
     Function funValue() {
-        if (value instanceof Function)
-            return (Function) value;
+        if (value instanceof Function) return (Function) value;
         else return null;
     }
 
     Value[] arrValue() {
-        if (value instanceof Value[])
-            return (Value[]) value;
+        if (value instanceof Value[]) return (Value[]) value;
         else return null;
     }
 
@@ -383,7 +365,6 @@ class Operator {
     public String toString() {
         return val;
     }
-
     public boolean equals(Object obj) {
         return val.equals(obj);
     }

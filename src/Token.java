@@ -1,4 +1,4 @@
-enum Token {
+public enum Token {
      BOOL("bool"),CHAR("char"), ELSE("else"), FALSE("false"), FLOAT("float"), 
      STRING("string"), IF("if"), INT("int"),  TRUE("true"), WHILE("while"), 
      RETURN("return"), VOID("void"), FUN("fun"),  THEN("then"), LET("let"), 

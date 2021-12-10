@@ -38,30 +38,18 @@ public class Sint {
                 return state;
         }
 
-        if (s instanceof Empty)
-	        return Eval((Empty)s, state);
-        if (s instanceof Assignment)
-	        return Eval((Assignment)s, state);
-        if (s instanceof If)
-	        return Eval((If)s, state);
-        if (s instanceof While)
-	        return Eval((While)s, state);
-        if (s instanceof Stmts)
-	        return Eval((Stmts)s, state);
-	    if (s instanceof Let)
-	       return Eval((Let)s, state);
-	    if (s instanceof Read)
-	       return Eval((Read)s, state);
-	    if (s instanceof Print)
-	       return Eval((Print)s, state);
-        if (s instanceof Call)
-	       return Eval((Call)s, state);
-	    if (s instanceof Return)
-	       return Eval((Return)s, state);
-	    if (s instanceof Raise)
-	       return Eval((Raise)s, state);
-	    if (s instanceof Try)
-	       return Eval((Try)s, state);
+        if (s instanceof Empty) return Eval((Empty)s, state);
+        if (s instanceof Assignment) return Eval((Assignment)s, state);
+        if (s instanceof If) return Eval((If)s, state);
+        if (s instanceof While) return Eval((While)s, state);
+        if (s instanceof Stmts) return Eval((Stmts)s, state);
+	    if (s instanceof Let) return Eval((Let)s, state);
+	    if (s instanceof Read) return Eval((Read)s, state);
+	    if (s instanceof Print) return Eval((Print)s, state);
+        if (s instanceof Call) return Eval((Call)s, state);
+	    if (s instanceof Return) return Eval((Return)s, state);
+	    if (s instanceof Raise) return Eval((Raise)s, state);
+	    if (s instanceof Try) return Eval((Try)s, state);
         throw new IllegalArgumentException("no statement");
     }
 
@@ -96,8 +84,7 @@ public class Sint {
     }
 
     State newFrame (State state, Call c, Function f) {
-        if (c.args.size() == 0)
-            return state;
+        if (c.args.size() == 0) return state;
 	    Value val[] = new Value[f.params.size()];
         int i = 0;
         for (Expr e : c.args)
@@ -116,8 +103,7 @@ public class Sint {
 
     State deleteFrame (State state, Call c, Function f) {
 	// free a stack frame from the stack
-        if (f.params != null)
-	        state  = free(f.params, state);
+        if (f.params != null) state  = free(f.params, state);
         state.pop(); // pop barrier
         return state;
     }
@@ -149,7 +135,7 @@ public class Sint {
 
     // (3) While Eval Implementation
     State Eval(While l, State state) {
-        if(V(l.expr,state).boolValue()) return Eval(l, Eval(l.stmt, state));
+        if(V(l.expr, state).boolValue()) return Eval(l, Eval(l.stmt, state));
         else return state;
     }
 
@@ -190,14 +176,22 @@ public class Sint {
 
     // (7) Allocate Function Implementation
     State allocate (Decls ds, State state) {
-        // Allocate Implementation
-        return null;
+        for (Decl d : ds) {
+            if(d.expr != null) state.push(d.id, V(d.expr,state));
+            else {
+                Value v = new Value(d.type);
+                state.push(d.id, V(v,state));
+            }
+        }
+        return state;
     }
 
     // (8) Free Function Implementation
     State free (Decls ds, State state) {
-	    // Free Implementation
-        return null;
+        for (Decl d : ds) {
+            state.pop();
+        }
+        return state;
     }
 
 

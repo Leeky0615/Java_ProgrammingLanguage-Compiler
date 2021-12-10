@@ -34,7 +34,7 @@ class State extends Stack<Pair> {
     /**
      * (2) Pop function Implementation (Optional)
      * 1. super class(Stack)의 pop 사용.
-     * 2. stack top에 원소 삽입 후 해당 원소 리턴
+     * 2. stack top에 있는 원소를 뽑은 후 해당 원소 리턴
      * @return Pair
      */
     public Pair pop() {
@@ -50,8 +50,8 @@ class State extends Stack<Pair> {
      * @return Stack = size()-i <=> (Vector = i) || no value = -1
      */
     public int lookup (Identifier id) {
-        for (int i = size()-1; i > -1; i--) {
-            if(elementAt(i).id == id) return size()-i;
+        for (Pair pair : this) {
+            if(pair.id.equals(id)) return search(pair);
         }
         return -1;
     }
@@ -64,7 +64,7 @@ class State extends Stack<Pair> {
      * @Return State -> this : 자기자신 리턴
      */
     public State set(Identifier id, Value val) {
-        super.set(size() - 1, new Pair(id, val));
+        super.set(size()-lookup(id), new Pair(id, val));
         return this;
     }
 
@@ -77,10 +77,12 @@ class State extends Stack<Pair> {
      * @return value
      */
     public Value get (Identifier id) {
-        int idx = lookup(id);
-        if(idx != -1) return super.get(size()-idx).val;
-        else return null;
+        for (Pair pair : this) {
+            if(pair.id.equals(id)) return pair.val;
+        }
+        return null;
     }
+
 
 
 }

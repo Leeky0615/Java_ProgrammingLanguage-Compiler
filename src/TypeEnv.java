@@ -31,7 +31,10 @@ class TypeEnv extends Stack<Entry> {
      * @return boolean
      */
     public boolean contains (Identifier id) {
-        return super.contains(id);
+        for (Entry entry : this) {
+            if(entry.id.equals(id)) return true;
+        }
+        return false;
     }
 
     /**
@@ -43,8 +46,8 @@ class TypeEnv extends Stack<Entry> {
      * @return Type
      */
     public Type get (Identifier id) {
-        for (int i = size()-1; i > -1; i--) {
-            if(elementAt(i).id == id) return super.get(size() - i).type;
+        for (Entry entry : this) {
+            if(entry.id.equals(id)) return entry.type;
         }
         return null;
     }

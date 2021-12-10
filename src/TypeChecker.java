@@ -7,46 +7,40 @@ public class TypeChecker {
     public static Type Check(Command p) {
         if (p instanceof Decl) {
             Decl d = (Decl) p;
-	    if (tenv.contains(d.id)) 
-                error(d, "duplicate variable declaration"); 
-	    else
-                return Check(d,tenv);
+	        if (tenv.contains(d.id)) error(d, "duplicate variable declaration");
+	        else return Check(d,tenv);
         }
 
 	    if (p instanceof Function) {
             Function f = (Function) p;
-            if (tenv.contains(f.id)) 
-                error(f, "duplicate function definition"); 
-	        else
-                return Check(f,tenv);
+            if (tenv.contains(f.id)) error(f, "duplicate function definition");
+	        else return Check(f,tenv);
         }
-	
-	    if (p instanceof Stmt)
-	        return Check((Stmt) p, tenv); 
-		
+
+	    if (p instanceof Stmt) return Check((Stmt) p, tenv);
+
 	    throw new IllegalArgumentException("undefined command");
-    } 
+    }
 
     public static Type Check(Decl decl, TypeEnv te) {
         if (decl.arraySize == 0 && decl.expr != null)
-	    if (decl.type != Check(decl.expr, te))
-	        error(decl, "type error: incorrect initialization to " + decl.id);
+	    if (decl.type != Check(decl.expr, te)) error(decl, "type error: incorrect initialization to " + decl.id);
         te.push (decl.id, decl.type);
         return decl.type;
     }
 
     public static Type Check(Function f, TypeEnv te) {
 	     te.push(f.id, new ProtoType(f.type, f.params));
-         for (Decl d : f.params) 
+         for (Decl d : f.params)
              te.push (d.id, d.type);
 
 	     Type t = Check(f.stmt, te); // type check the function body
 	     System.out.println(t);
-	     if (t != f.type)  
+	     if (t != f.type)
 	         error(f, "incorrect return type");
 
-         for (Decl d : f.params) 
-             te.pop(); 
+         for (Decl d : f.params)
+             te.pop();
          te.pop();                   // pop and push prototype type
 	     te.push(f.id, new ProtoType(f.type, f.params));
          return f.type;
@@ -63,38 +57,42 @@ public class TypeChecker {
     }
 
     static Type Check(Expr e, TypeEnv te) {
+//        System.out.println("Type Check(Expr e, TypeEnv te) 호출!!");
         if (e instanceof Value) {
-	        Value v = (Value)e;
+            Value v = (Value)e;
             return v.type;
-	    }
+        }
 
-        if (e instanceof Identifier) { 
+        if (e instanceof Identifier) {
+//            System.out.println("if (e instanceof Identifier) 호출!!");
             Identifier id = (Identifier) e;
-            if (!te.contains(id)) 
-                error(id, "undeclared variable: " + id);
-	        else id.type = te.get(id); 
+//            System.out.println(te.get(0).type.toString());
+//            System.out.println("안에 들어있는 ID"+te.get(0).id);
+//            System.out.println(id.toString());
+            if (!te.contains(id)) error(id, "undeclared variable: " + id);
+	        else id.type = te.get(id);
             return id.type;
         }
 
-        if (e instanceof Array) { 
+        if (e instanceof Array) {
             Array ar = (Array) e;
-            if (!te.contains(ar.id)) 
+            if (!te.contains(ar.id))
                 error(ar, "undeclared variable: " + ar.id);
 	        else if (Check(ar.expr, te) == Type.INT)
-		        ar.type = te.get(ar.id); 
+		        ar.type = te.get(ar.id);
 	        else
 		        error(ar, "non-int index: " + ar.expr);
             return ar.type;
         }
 
-        if (e instanceof Binary) 
-            return Check((Binary) e, te); 
+        if (e instanceof Binary)
+            return Check((Binary) e, te);
 
-        if (e instanceof Unary) 
-            return Check((Unary) e, te); 
+        if (e instanceof Unary)
+            return Check((Unary) e, te);
 
-        if (e instanceof Call) 
-            return Check((Call) e, te); 
+        if (e instanceof Call)
+            return Check((Call) e, te);
 
         throw new IllegalArgumentException("undefined operator");
     }
@@ -120,7 +118,7 @@ public class TypeChecker {
         }
         return b.type;
     }
-    
+
     // (2) Unary Type Check Implementation
     static Type Check(Unary u, TypeEnv te) {
         Type t1 = Check(u.expr, te);
@@ -137,34 +135,34 @@ public class TypeChecker {
         }
         return u.type;
     }
-    
-    
+
+
     public static Type Check(Stmt s, TypeEnv te) {
         if ( s == null )
             throw new IllegalArgumentException( "AST error: null statement");
-        if (s instanceof Empty) 
+        if (s instanceof Empty)
 	         return Type.VOID;
-        if (s instanceof Assignment) 
+        if (s instanceof Assignment)
             return Check((Assignment) s, te);
-	    if (s instanceof Read) 
-            return Check((Read) s, te);		
-        if (s instanceof Print) 
+	    if (s instanceof Read)
+            return Check((Read) s, te);
+        if (s instanceof Print)
             return Check((Print) s, te);
-        if (s instanceof If) 
+        if (s instanceof If)
            return Check((If) s, te);
-        if (s instanceof While) 
+        if (s instanceof While)
            return Check((While) s, te);
-        if (s instanceof Stmts) 
-           return Check((Stmts) s, te); 
-        if (s instanceof Let) 
+        if (s instanceof Stmts)
+           return Check((Stmts) s, te);
+        if (s instanceof Let)
            return Check((Let) s, te);
-        if (s instanceof Call) 
+        if (s instanceof Call)
            return Check((Call) s, te);
-	    if (s instanceof Return) 
+	    if (s instanceof Return)
            return Check((Return) s, te);
-	    if (s instanceof Raise) 
+	    if (s instanceof Raise)
            return Check((Raise) s, te);
-	    if (s instanceof Try) 
+	    if (s instanceof Try)
            return Check((Try) s, te);
 	    if (s instanceof For)
            return Check((For) s, te);
@@ -193,7 +191,7 @@ public class TypeChecker {
         Type t = Check(r.expr,te);
         if (t == Type.ERROR)
             error(r, "type error in expr: " + r.expr);
-        else 
+        else
 	        r.type = t;
         return r.type;
     }
@@ -271,7 +269,7 @@ public class TypeChecker {
         Type t = Check(r.eid,te);
         if (t == Type.EXC)
 	    r.type = Type.VOID;
-        else 
+        else
             error(r, "type error in exception: " + r.eid);
         return r.type;
     }
@@ -284,7 +282,7 @@ public class TypeChecker {
         Type t1 = Check(t.stmt1, te);
         Type t2 = Check(t.stmt2, te);
         if (t1 == Type.VOID && t2 == Type.VOID)
-	        t.type = Type.VOID; 
+	        t.type = Type.VOID;
         else
             error(t, "type error in try-catch ");
 
@@ -293,65 +291,65 @@ public class TypeChecker {
 
     static Type Check(Call c, TypeEnv te) {
        if (!te.contains(c.fid)) {
-           error(c, "undefined function: " + c.fid); 
+           error(c, "undefined function: " + c.fid);
            return c.type;
        }
        Exprs args = c.args;
        ProtoType p = (ProtoType)te.get(c.fid);
        c.type = p.result;
        // check arguments against the ProtoType
-       if (args.size() == p.params.size()) 
+       if (args.size() == p.params.size())
            for (int i=0; i<args.size(); i++) {  // match arg types with param types
                 Expr e = (Expr)args.get(i);
                 Type t1 = Check(e,te);
                 Type t2 = ((Decl)p.params.get(i)).type;
-                if (t1 != t2) 
+                if (t1 != t2)
                     error(c, "argument type does not match parameter");
            }
-       else 
+       else
            error(c, "do not match numbers of arguments and params");
-         
+
        return c.type;
     }
 
     public static TypeEnv addType (Decls ds, TypeEnv te) {
         // put the variable decls into a symbol table(TypeEnv) 
-        if (ds != null) 
-        for (Decl decl : ds) 
-	        Check(decl, te); 
+        if (ds != null)
+            for (Decl decl : ds)
+                Check(decl, te);
 
         return te;
     }
 
     public static TypeEnv addType (Decls ds, Functions fs, TypeEnv te) {
         // put the variable decls into a symbol table(TypeEnv) 
-        if (ds != null) 
-        for (Decl decl : ds) 
-	        Check(decl, te); 
+        if (ds != null)
+            for (Decl decl : ds)
+                Check(decl, te);
 
-        if (fs != null) 
-        for (Function f : fs) 
-	        Check(f, te); 
+        if (fs != null)
+            for (Function f : fs)
+                Check(f, te);
 
         return te;
     }
 
     static TypeEnv deleteType(Decls ds, TypeEnv te) {
         if (ds != null)
-        for (Decl decl : ds)
-            te.pop();
+            for (Decl decl : ds)
+                te.pop();
 
         return te;
     }
 
     static TypeEnv deleteType(Decls ds, Functions fs, TypeEnv te) {
         if (ds != null)
-        for (Decl decl : ds)
-            te.pop();
+            for (Decl decl : ds)
+                te.pop();
 
         if (fs != null)
-        for (Function f: fs)
-            te.pop();
+            for (Function f: fs)
+                te.pop();
 
         return te;
     }
