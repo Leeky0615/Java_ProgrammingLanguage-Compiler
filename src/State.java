@@ -50,8 +50,9 @@ class State extends Stack<Pair> {
      * @return Stack = size()-i <=> (Vector = i) || no value = -1
      */
     public int lookup (Identifier id) {
-        for (Pair pair : this) {
-            if(pair.id.equals(id)) return search(pair);
+        for (int i = 1; i < size()+1; i++) {
+            if(super.get(size()-i).id.equals(id))
+                return i;
         }
         return -1;
     }
@@ -77,8 +78,9 @@ class State extends Stack<Pair> {
      * @return value
      */
     public Value get (Identifier id) {
-        for (Pair pair : this) {
-            if(pair.id.equals(id)) return pair.val;
+        for (int i = 1; i < size()+1; i++) {
+            if(super.get(size()-i).id.equals(id))
+                return super.get(size()-i).val;
         }
         return null;
     }

@@ -31,8 +31,9 @@ class TypeEnv extends Stack<Entry> {
      * @return boolean
      */
     public boolean contains (Identifier id) {
-        for (Entry entry : this) {
-            if(entry.id.equals(id)) return true;
+        for (int i = 1; i < size()+1; i++) {
+            if(super.get(size()-i).id.equals(id))
+                return true;
         }
         return false;
     }
@@ -46,8 +47,9 @@ class TypeEnv extends Stack<Entry> {
      * @return Type
      */
     public Type get (Identifier id) {
-        for (Entry entry : this) {
-            if(entry.id.equals(id)) return entry.type;
+        for (int i = 1; i < size()+1; i++) {
+            if(super.get(size()-i).id.equals(id))
+                return super.get(size()-i).type;
         }
         return null;
     }
