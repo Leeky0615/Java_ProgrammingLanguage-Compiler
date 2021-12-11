@@ -171,35 +171,43 @@ public class Parser {
         return ss;
     }
 
-
-    //(6) Let Parser Implementation
+    /**
+     * (6) Let Parser Implementation
+     * Syntax : <letStmt> -> let <decls> in <block> end
+     * @return Let.class ['new Let(ds, null, ss)']
+     */
     private Let letStmt() {
-        // <letStmt> -> let <decls> in <block> end
-        match(Token.LET);
-        Decls ds = decls();
-        match(Token.IN);
-        Stmts ss = stmts();
-        match(Token.END);
-        match(Token.SEMICOLON);
-        return new Let(ds, null, ss);
+        match(Token.LET); // 'let' 토큰 매칭
+        Decls ds = decls(); // let 문에서 사용될 변수 선언을 위해 decls 파싱
+        match(Token.IN); // 'in' 토큰 매칭
+        Stmts ss = stmts(); // let 문 안에서 사용될 stmts 파싱
+        match(Token.END); // 'end' 토큰 매칭
+        match(Token.SEMICOLON); // ';' 토큰 매칭
+        return new Let(ds, null, ss); // Let AST 리턴
     }
 
-    //(7) Read Parser Implementation
+    /**
+     * (7) Read Parser Implementation
+     * Syntax : <readStmt> -> read id
+     * @return Read.class ['new Read(id)']
+     */
     private Read readStmt() {
-        // <readStmt> -> read id;
-        match(Token.READ);
-        Identifier id = new Identifier(match(Token.ID));
-        match(Token.SEMICOLON);
-        return new Read(id);
+        match(Token.READ); // 'read' 토큰 매칭
+        Identifier id = new Identifier(match(Token.ID)); // 읽을 ID 생성 ('id' 토큰 매칭)
+        match(Token.SEMICOLON); // ';' 토큰 매칭
+        return new Read(id); // 읽을 id를 담아 Read AST 리턴
     }
 
-    //(8) Print Parser Implementation
+    /**
+     * (8) Print Parser Implementation
+     * Syntax : <printStmt> -> print <expr>
+     * @return Print.class ['new Print(e)']
+     */
     private Print printStmt() {
-        // <printStmt> -> print <expr>;
-        match(Token.PRINT);
-        Expr e = expr();
-        match(Token.SEMICOLON);
-        return new Print(e);
+        match(Token.PRINT); // 'print' 토큰 매칭
+        Expr e = expr(); // print 할 expr 파싱
+        match(Token.SEMICOLON); // ';' 토큰 매칭
+        return new Print(e); // Print AST 리턴
     }
 
     private Return returnStmt() {
@@ -211,14 +219,17 @@ public class Parser {
     }
 
 
-    // (3) Assignment Parser Implementation
+    /**
+     * (3) Assignment Parser Implementation
+     * Syntax : id = <expr>
+     * @return Assignment.class ['new Assignment(id, e)']
+     */
     private Assignment assignment() {
-        // <assignment> -> id = <expr>;
-        Identifier id = new Identifier(match(Token.ID));
-        match(Token.ASSIGN);
-        Expr e = expr();
-        match(Token.SEMICOLON);
-        return new Assignment(id, e);
+        Identifier id = new Identifier(match(Token.ID)); // ID 토큰 매칭, 선언
+        match(Token.ASSIGN); // Assignment 토큰 매칭
+        Expr e = expr(); // 대입에 사용될 expr 파싱
+        match(Token.SEMICOLON); // Semicolon 토큰 매칭
+        return new Assignment(id, e); // Assignment AST 생성해 리턴
     }
 
 
@@ -231,36 +242,41 @@ public class Parser {
         return c;
     }
 
-
-    // (4) If Parser Implementation
+    /**
+     * (4) If Parser Implementation
+     * Syntax : <ifStmt> -> if (<expr>) then <stmt> [else <stmt>]
+     * @return If.class ['new If(e, s1, s2)']
+     */
     private If ifStmt() {
-        // <ifStmt> -> if (<expr>) then <stmt> [else <stmt>]
-        match(Token.IF);
-        match(Token.LPAREN);
-        Expr e = expr();
-        match(Token.RPAREN);
-        Stmt s1 = new Empty();
+        match(Token.IF); // 'if' 토큰 매칭
+        match(Token.LPAREN); // '(' 토큰 매칭
+        Expr e = expr(); // 비교에 사용될 expr 파싱
+        match(Token.RPAREN); // ')' 토큰 매칭
+        Stmt s1 = new Empty(); // 조건 1('then')에 사용될 빈 stmt 생성
         if(token == Token.THEN){
-            match(Token.THEN);
-            s1 = stmt();
+            match(Token.THEN); // 'then' 토큰 매칭
+            s1 = stmt(); // 조건 1 stmt 파싱
         }
-        Stmt s2 = new Empty();
+        Stmt s2 = new Empty(); // 조건 2('else')에 사용될 빈 stmt 생성
         if (token == Token.ELSE) {
-            match(Token.ELSE);
-            s2 = stmt();
+            match(Token.ELSE); // 'else' 토큰 매칭
+            s2 = stmt(); // 조건 2 stmt 파싱
         }
-        return new If(e, s1, s2);
+        return new If(e, s1, s2); // IF문 AST 를 생성해 리턴
     }
 
-    // (5) While Parser Implementation
+    /**
+     * (5) While Parser Implementation
+     * Syntax : <whileStmt> -> while (<expr>) <stmt>
+     * @return While.class ['new While(e,s)']
+     */
     private While whileStmt() {
-        // <whileStmt> -> while (<expr>) <stmt>
-        match(Token.WHILE);
-        match(Token.LPAREN);
-        Expr e = expr();
-        match(Token.RPAREN);
-        Stmt s = stmt();
-        return new While(e,s);
+        match(Token.WHILE); // 'while' 토큰 매칭
+        match(Token.LPAREN); // '(' 토큰 매칭
+        Expr e = expr(); // 반복을 위한 비교문에 사용될 expr 파싱
+        match(Token.RPAREN); // ')' 토큰 매칭
+        Stmt s = stmt(); // 조건에 만족 할 경우 수행될 stmt 파싱
+        return new While(e,s); // while문 AST를 생성해 리턴
     }
 
 
@@ -359,11 +375,18 @@ public class Parser {
         return e;
     }
 
-
-    // (1) Expr Implementation 1 (aexp -> "+" & "-")
+    /**
+     * (1) Expr Implementation 1 (aexp -> "+" & "-")
+     * Syntax : <aexp> -> <term> { + <term> | - <term> }
+     * Implementation
+     * - Expr의 첫째항을 파싱
+     * - Operator 토큰 확인 ('+' or '-')
+     *   - Operator를 매치하고 다음 항 파싱
+     *   - Binary 수식 AST 구성
+     * - 수식 AST 리턴
+     * @return Expr.class;
+     */
     private Expr aexp() {
-        // <aexp> -> <term> { + <term> | - <term> }
-        // aexp implementation
         Expr e = term(); // 첫번째 항(term) 파싱
         while (token == Token.PLUS || token == Token.MINUS) {  // + or -
             Operator op = new Operator(match(token));  // 연산자 매치
@@ -373,9 +396,18 @@ public class Parser {
         return e;  // 수식 AST 리턴
     }
 
-    // (2) Expr Implementation 2 (term -> "*" & "/")
+    /**
+     * (2) Expr Implementation 2 (term -> "*" & "/")
+     * Syntax : <term> -> <factor> { * <factor> | / <factor>}
+     * Implementation
+     * - Expr의 첫번째 인수 파싱
+     * - Operator 토큰 확인 ('*' or '/')
+     *   - Operator를 매치하고 두번째 인수 파싱
+     *   - Binary로 항의 AST 구성
+     * - 항의 AST 리턴
+     * @return Expr.class;
+     */
     private Expr term() {
-        // <term> -> <factor> { * <factor> | / <factor>}
         Expr t = factor();  // 첫번째 인수 파싱
         while (token == Token.MULTIPLY || token == Token.DIVIDE) {
             Operator op = new Operator(match(token));  // 연산자 매칭

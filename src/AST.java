@@ -104,7 +104,14 @@ class Stmts extends Stmt {
     }
 }
 
-// (3) Assignment AST Implementation
+/**
+ * (3) Assignment AST Implementation / 대입문
+ * Super Class : Stmt
+ * Attributes : Identifier id; Expr expr;
+ * Syntax : id = <expr>;
+ * AST : Identifier Expr
+ * example : x=1; / x=x+1;
+ */
 class Assignment extends Stmt {
     // Assignment = Identifier id; Expr expr
     Identifier id;
@@ -116,7 +123,14 @@ class Assignment extends Stmt {
     }
 }
 
-// (4) If AST Implementation
+/**
+ * (4) If AST Implementation / If 문
+ * Super Class : Stmt
+ * Attributes : Expr expr; Stmt stmt1, Stmt stmt2;
+ * Syntax : if (<expr>) then <stmt> [else <stmt>]
+ * AST : Expr Stmt Stmt
+ * Example : if(x>0) then x=x*2;else x=-1;
+ */
 class If extends Stmt {
     // If = Expr expr; Stmt stmt1, stmt2;
     Expr expr;
@@ -128,10 +142,15 @@ class If extends Stmt {
         this.stmt2 = s2;
     }
 }
-
-// (5) While AST Implementation
+/**
+ * (5) While AST Implementation / While 문
+ * Super Class : Stmt
+ * Attributes : Expr expr; Stmt stmt;
+ * Syntax : while '('<expr>')' <stmt>
+ * AST : Expr Stmt
+ * Example : while (x < 10) {x = x + 1;}
+ */
 class While extends Stmt {
-    // While = Expr expr; Stmt stmt;
     Expr expr;
     Stmt stmt;
 
@@ -140,8 +159,14 @@ class While extends Stmt {
         this.stmt = s;
     }
 }
-
-// (6) Let AST Implementation
+/**
+ * (6) Let AST Implementation / Let 문
+ * Super Class : Stmt
+ * Attributes : Decls decls; Functions funs; Stmts stmts;
+ * Syntax : let <decls> in <stmts> end
+ * AST : Decls Stmts
+ * Example : let int x; int y; in x = 1; y = 2; end;
+ */
 class Let extends Stmt {
     // Let = Decls decls; Functions funs; Stmts stmts;
     Decls decls;
@@ -155,21 +180,41 @@ class Let extends Stmt {
     }
 }
 
-// (7) Read AST Implementation
+/**
+ * (7) Read AST Implementation / read 문
+ * Super Class : Stmt
+ * Attributes : Identifier id;
+ * Syntax : read id
+ * AST : Identifier
+ * Example : read x;
+ */
 class Read extends Stmt {
-    // Read = Identifier id
     Identifier id;
     public Read(Identifier id) {this.id = id;}
 }
 
-// (8) Print AST Implementation
+/**
+ * (8) Print AST Implementation / print 문
+ * Super Class : Stmt
+ * Attributes : Expr expr;
+ * Syntax : print <expr>
+ * AST : Expr
+ * Example : print x; / print "Hello world!!";
+ */
 class Print extends Stmt {
-    // Print =  Expr expr
     Expr expr;
     public Print(Expr e) {this.expr = e;}
 }
+
+/**
+ * (9) For AST Implementation / for 문
+ * Super Class : Stmt
+ * Attributes : Decl decl; Expr expr; Assignment assignment, Stmt stmt;
+ * Syntax : for '('<decl>;<expr>;<assignment>')'<stmt>
+ * AST : Decl Expr Assignment Stmt
+ * Example : for(int i = 0; i < 5; i = i + 1;) { x = x + i; }
+ */
 class For extends Stmt {
-    // For = Decl decl; Expr expr; Assignment assignment, Stmt stmt
     Decl decl;
     Expr expr;
     Assignment assignment;
@@ -330,9 +375,14 @@ class Value extends Expr {
     }
 }
 
-// (1) Binary AST Implementation
+/**
+ * (1) Binary AST Implementation / 이항 연산
+ * Super Class : Expr
+ * Attributes : Operator op; Expr expr1; Expr expr2;
+ * AST : Expr1 Operator Expr2
+ * Example : x+y, x==y
+ */
 class Binary extends Expr {
-    // Binary = Operator op; Expr expr1; Expr expr2;
     Operator op;
     Expr expr1, expr2;
 
@@ -343,9 +393,14 @@ class Binary extends Expr {
     }
 }
 
-// (2) Unary AST Implementation
+/**
+ * (2) Unary AST Implementation / 단항 연산
+ * Super Class : Expr
+ * Attributes : Operator op; Expr expr;
+ * AST : Expr Operator
+ * Example : -x , !x
+ */
 class Unary extends Expr {
-    // Unary = Operator op; Expr expr
     Operator op;
     Expr expr;
 
