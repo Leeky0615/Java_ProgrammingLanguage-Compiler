@@ -143,7 +143,7 @@ public class Parser {
                 s = whileStmt(); return s;
             case DO:      // do statement
                 s = doStmt(); return s;
-            case FOR:      // for statement (for implementation)
+            case FOR:      // for statement
                 s = forStmt(); return s;
             case ID:    // assignment
                 s = assignment(); return s;
@@ -196,7 +196,6 @@ public class Parser {
     //(8) Print Parser Implementation
     private Print printStmt() {
         // <printStmt> -> print <expr>;
-        // Print Implementation
         match(Token.PRINT);
         Expr e = expr();
         match(Token.SEMICOLON);
@@ -213,7 +212,7 @@ public class Parser {
 
 
     // (3) Assignment Parser Implementation
-    private Stmt assignment() {
+    private Assignment assignment() {
         // <assignment> -> id = <expr>;
         Identifier id = new Identifier(match(Token.ID));
         match(Token.ASSIGN);
@@ -310,14 +309,13 @@ public class Parser {
         // <forStmt> -> Decl decl; Expr expr; Assignment assignment; Stmt stmt;
         match(Token.FOR);
         match(Token.LPAREN);
-        Decl decl = decl();
+        Decl d = decl();
+        Expr e = expr();
         match(Token.SEMICOLON);
-        Expr expr1 = expr();
-        match(Token.SEMICOLON);
-        Expr expr2 = expr();
+        Assignment a = assignment();
         match(Token.RPAREN);
-        Stmt stmt = stmt();
-        return null;
+        Stmt s = stmt();
+        return new For(d,e,a,s);
     }
 
     private Expr expr() {

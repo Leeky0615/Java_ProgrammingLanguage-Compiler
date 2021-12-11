@@ -8,7 +8,9 @@ in
        if (j>0) 
           then i=i+j; 
           else i=i-j;
+       print "<Local Variable 'i'>";
        print i;
     end;
+    print "<Global Variable 'i'>";
     print i;
 end;

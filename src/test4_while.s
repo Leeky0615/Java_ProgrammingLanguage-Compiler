@@ -5,7 +5,8 @@ in
     while (i<=3) {
         j=1;
         while (j<=4) {
-           k = i * j; 
+           k = i * j;
+           print "<VALUE 'i, j, k'>";
            print i; print j; print k;
            j=j+1;
         }

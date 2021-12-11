@@ -232,17 +232,18 @@ public class TypeChecker {
         return l.type;
     }
     static Type Check(For f, TypeEnv te) {
-        addType(new Decls(f.decl), te);
-        Type t1 = Check(f.expr, te);
-        Type t2 = Check(f.assignment, te);
-        Type t3 = Check(f.stmt, te);
-        if (t1 == Type.BOOL) {
-            if(t3 == Type.VOID) {
-                if(t2 == Type.VOID) f.type = t3;
-                else error(f,"undefined variable in assignment");
-            }else error(f,"return in loop..");
+        Decls decls = new Decls(f.decl);
+        addType(decls, te);
+        Type t = Check(f.expr, te);
+        Type t1 = Check(f.assignment, te);
+        Type t2 = Check(f.stmt, te);
+        if (t == Type.BOOL) {
+            if(t1 == Type.VOID) {
+                if(t2 == Type.VOID) f.type = t2;
+                else error(f,"return in loop..");
+            }else error(f,"undefined variable in assignment");
         } else error(f, "non-bool test in loop");
-        deleteType(new Decls(f.decl), te);
+        deleteType(decls, te);
         return f.type;
     }
 

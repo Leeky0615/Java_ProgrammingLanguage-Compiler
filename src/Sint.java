@@ -50,6 +50,7 @@ public class Sint {
 	    if (s instanceof Return) return Eval((Return)s, state);
 	    if (s instanceof Raise) return Eval((Raise)s, state);
 	    if (s instanceof Try) return Eval((Try)s, state);
+	    if (s instanceof For) return Eval((For)s, state);
         throw new IllegalArgumentException("no statement");
     }
 
@@ -118,14 +119,15 @@ public class Sint {
         Value v = V(a.expr, state);
         return state.set(a.id, v);
     }
-//    State For(For f, State state){
-//        State s = allocate(f.decl, state);
-//        while (V(f.expr,s).boolValue()) {
-//            s = Eval(f.stmt, s);
-//            s = Eval(f.assignment, s);
-//        }
-//        return free(f.decl, s);
-//    }
+    State Eval(For f, State state){
+        Decls decls = new Decls(f.decl);
+        State s = allocate(decls, state);
+        while (V(f.expr,s).boolValue()) {
+            s = Eval(f.stmt, s);
+            s = Eval(f.assignment, s);
+        }
+        return free(decls, s);
+    }
 
     // (2) If Eval Implementation
     State Eval(If c, State state) {

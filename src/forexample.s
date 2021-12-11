@@ -1,12 +1,11 @@
 let
-   int i = 1; int sum = 0; int n;
+   int sum = 0; int n;
 in
    print "1 + 2 + ... + n?";
    print "<INPUT 'n'>";
    read n;
-   while (i <= n) {
+   for (int i = 1; i < n + 1; i = i + 1;) {
        sum = sum + i;
-       i = i + 1;
    }
    print "<RESULT 'sum'>";
    print sum;
