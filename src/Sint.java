@@ -114,57 +114,89 @@ public class Sint {
     }
 
 
-    // (1) Assignment Eval Implementation
+    /**
+     * (1) Assignment Eval Implementation
+     * Syntax : id = <expr>;
+     * V 함수를 통해 값을 계산 후 상태를 변환
+     * @return State
+     */
     State Eval(Assignment a, State state) {
-        Value v = V(a.expr, state);
-        return state.set(a.id, v);
-    }
-    State Eval(For f, State state){
-        Decls decls = new Decls(f.decl);
-        State s = allocate(decls, state);
-        while (V(f.expr,s).boolValue()) {
-            s = Eval(f.stmt, s);
-            s = Eval(f.assignment, s);
-        }
-        return free(decls, s);
+        Value v = V(a.expr, state); // assignment의 수식 계산.
+        return state.set(a.id, v); // 스택탑에서 id를 찾아 값을 넣어줌
     }
 
-    // (2) If Eval Implementation
+    /**
+     * (2) If Eval Implementation
+     * Syntax : if (<expr>) then <stmt> [else <stmt>]
+     * If의 expr의 boolean값을 받아와
+     *  참이면 then의 stmt1을
+     *  거짓이면 else의 stmt2를 리턴
+     * @return State
+     */
     State Eval(If c, State state) {
-        if(V(c.expr,state).boolValue()) return Eval(c.stmt1, state);
-        else return Eval(c.stmt2, state);
+        if(V(c.expr,state).boolValue()) //  expr값 가져와 비교
+            return Eval(c.stmt1, state); // stmt1 리턴
+        else return Eval(c.stmt2, state); // stmt2 리턴
     }
 
-    // (3) While Eval Implementation
+    /**
+     * (3) While Eval Implementation
+     * Syntax : while '('<expr>')' <stmt>
+     * while의 expr의 boolean값을 받아와
+     * 조건에 맞으면 안에 stmt문을 실행한뒤 변이된
+     * 상태를 다시 재귀적 호출
+     * 아니면 바뀐 상태 리턴
+     * @return State
+     */
     State Eval(While l, State state) {
-        if(V(l.expr, state).boolValue()) return Eval(l, Eval(l.stmt, state));
-        else return state;
+        if(V(l.expr, state).boolValue()) // expr 값 비교
+            return Eval(l, Eval(l.stmt, state)); // stmt 실행 뒤 상태를 다시 재귀적으로 호출
+        else return state; // 변이된 상태 리턴
     }
 
-    // (4) Let Eval Implementation
+    /**
+     * (4) Let Eval Implementation
+     * Syntax : let <decls> in <stmts> end
+     * let -> 현재 상태에 decls 선언문에 있는 id를 allocate함.
+     * in -> 다음 stmts로 상태 변환
+     * end -> 마지막으로 let문에서 선언된 decls를 상태에서 제거
+     * @return State
+     */
     State Eval(Let l, State state) {
-        State s = allocate(l.decls, state);
-        s = Eval(l.stmts, s);
-        return free(l.decls,s);
+        State s = allocate(l.decls, state); // decls를 allocate함.
+        s = Eval(l.stmts, s); // 내부 stmts로 상태 변환
+        return free(l.decls,s); // 선언된 decls stack에서 해제
     }
 
-    // (5) Read Eval Implementation
+    /**
+     * (5) Read Eval Implementation
+     * Syntax : read id
+     * 들어온 Read 클래스의 타입을 읽어
+     * 타입에 맞게 scanner에서 읽은 뒤
+     * 스택에 id, value로 설정
+     * @return State
+     */
     State Eval(Read r, State state) {
-        if (r.id.type == Type.INT) {
-            int i = sc.nextInt();
-            state.set(r.id, new Value(i));
+        if (r.id.type == Type.INT) { // int 타입인 경우
+            int i = sc.nextInt(); // int 읽기
+            state.set(r.id, new Value(i)); // 스택에 id, value 설정
         }
-        if (r.id.type == Type.BOOL) {
-            boolean b = sc.nextBoolean();
-            state.set(r.id, new Value(b));
+        if (r.id.type == Type.BOOL) { // boolean 타입인 경우
+            boolean b = sc.nextBoolean(); // boolean 읽기
+            state.set(r.id, new Value(b)); // 스택에 id, value 설정
         }
-        return state;
+        return state; // 변환된 상태 리턴
     }
 
-    // (6) Print Eval Implementation
+    /**
+     * (6) Print Eval Implementation
+     * Syntax : Print <expr>;
+     * 수식의 값을 계산한 뒤에 출력.
+     * @return State
+     */
     State Eval(Print p, State state) {
-        System.out.println(V(p.expr, state));
-        return state;
+        System.out.println(V(p.expr, state)); // 현재 상태에서 수식 계산 후 출력
+        return state; // 상태 리턴
     }
 
 
@@ -176,26 +208,53 @@ public class Sint {
     }
 
 
-    // (7) Allocate Function Implementation
+    /**
+     * (7) Allocate Function Implementation
+     * 매개변수로 들어온 선언문들을 loop돌면서 하나씩 확인
+     * 선언문의 초기화값이 없다면 해당 타입에 맞는 default값으로 Value생성
+     *  id와 생성된 value를 stack top에 넣는다.
+     * 초기화 값이 있다면 뒤의 수식을 계산한뒤 id와 value값을 넣는다.
+     * @return State
+     */
     State allocate (Decls ds, State state) {
-        for (Decl d : ds) {
-            if(d.expr != null) state.push(d.id, V(d.expr,state));
-            else {
-                Value v = new Value(d.type);
-                state.push(d.id, V(v,state));
-            }
-        }
-        return state;
+        for (Decl d : ds) { // decl을 반목문으로 돌림
+            if(d.expr == null) // decl의 expr이 없다면
+                state.push(d.id, V(new Value(d.type),state)); // decl의 타입에 맞는 value를 생성해 stack에 push
+            else  // expr이 있다면
+                state.push(d.id, V(d.expr,state)); // state에 expr을 계산한 값 push
+        } // 반복문 종료
+        return state; // 변환된 상태 리턴
     }
 
-    // (8) Free Function Implementation
+    /**
+     * (8) Free Function Implementation
+     * 매개변수로 들어온 선언문들의 개수만큼 반복문 실행
+     * state top의 값을 빼냄.
+     * @return State
+     */
     State free (Decls ds, State state) {
-        for (Decl d : ds) {
-            state.pop();
-        }
+        for (Decl d : ds) state.pop(); // 반복문을 돌면서 state에서 pop
         return state;
     }
 
+    /**
+     * (9) For Eval Implementation
+     * Syntax : for '('<decl>;<expr>;<assignment>')'<stmt>
+     * for문에서 사용되는 변수는 하나이므로 decls 클래스에 담아 생성.
+     * 변수와 상태를 stack에 할당한다.
+     * 반복문을 돌면서 연산값이 참이면 내부 수식과 대입문으로 상태변환
+     * for문 종료 후 선언된 변수 stack에서 해제
+     * @return State
+     */
+    State Eval(For f, State state){
+        Decls decls = new Decls(f.decl); // for문에 있는 decl을 decls에 담음
+        State s = allocate(decls, state); // decl을 allocate 한 뒤 상태 저장
+        while (V(f.expr,s).boolValue()) { // for문의 expr이 참이면
+            s = Eval(f.stmt, s); // stmt문으로 상태변환
+            s = Eval(f.assignment, s); // assignment문으로 상태변환
+        }
+        return free(decls, s); // decls 해제
+    }
 
     // Allocate for Function Implementation (Optional)
     State allocate (Decls ds, Functions fs, State state) {

@@ -57,18 +57,13 @@ public class TypeChecker {
     }
 
     static Type Check(Expr e, TypeEnv te) {
-//        System.out.println("Type Check(Expr e, TypeEnv te) 호출!!");
         if (e instanceof Value) {
             Value v = (Value)e;
             return v.type;
         }
 
         if (e instanceof Identifier) {
-//            System.out.println("if (e instanceof Identifier) 호출!!");
             Identifier id = (Identifier) e;
-//            System.out.println(te.get(0).type.toString());
-//            System.out.println("안에 들어있는 ID"+te.get(0).id);
-//            System.out.println(id.toString());
             if (!te.contains(id)) error(id, "undeclared variable: " + id);
 	        else id.type = te.get(id);
             return id.type;
@@ -98,42 +93,63 @@ public class TypeChecker {
     }
 
 
-    // (1) Binary Type Check Implementation
+    /**
+     * (1) Binary Type Check Implementation
+     * 체크 함수를 통해 수식에 맞는 타입을 불러옴
+     * 이항 연산자 확인
+     *   사칙연산의 경우 두 왼쪽, 오른쪽 수식의 타입이 모두 int타입
+     *     참이면 이항연산의 타입 = int
+     *   비교연산의 경우 두 왼쪽, 오른쪽 수식의 타입이 같아야 함
+     *     같으면 이항연산의 타입 = boolean
+     *   and,or의 경우 두 왼쪽, 오른쪽 수식의 타입이 모두 booelan타입
+     *     같으면 이항연산의 타입 = boolean
+     *   아닐 경우에는 에러 호출
+     * @return Type
+     */
     static Type Check(Binary b, TypeEnv te) {
-        Type t1 = Check(b.expr1, te);
-        Type t2 = Check(b.expr2, te);
-        switch (b.op.val) {
-            case "+": case "-": case "*": case "/":
-                if(t1==Type.INT && t2==Type.INT) b.type = Type.INT;
-                else error(b, "type error for " + b.op);
+        Type t1 = Check(b.expr1, te); // 수식1의 타입
+        Type t2 = Check(b.expr2, te); // 수식2의 타입
+        switch (b.op.val) { // 이항연산의 연산자 비교
+            case "+": case "-": case "*": case "/": // 사칙연산
+                if(t1==Type.INT && t2==Type.INT) b.type = Type.INT; // 비교 후 참이면 int타입 대입
+                else error(b, "type error for " + b.op); // 거짓이면 에러
                 break;
-            case "<": case "<=":case ">":case ">=":case "==":case "!=":
-                if(t1 == t2) b.type = Type.BOOL;
-                else error(b, "type error for " + b.op);
+            case "<": case "<=":case ">":case ">=":case "==":case "!=": // 비교연산
+                if(t1 == t2) b.type = Type.BOOL; // 비교 후 참이면 boolean타입 대입
+                else error(b, "type error for " + b.op); // 거짓이면 에러
                 break;
-            case "&": case "|":
-                if(t1==Type.BOOL && t2==Type.BOOL) b.type = Type.BOOL;
-                else error(b, "type error for " + b.op);
+            case "&": case "|": // AND, OR
+                if(t1==Type.BOOL && t2==Type.BOOL) b.type = Type.BOOL; // 비교 후 참이면 boolean타입 대입
+                else error(b, "type error for " + b.op); // 거짓이면 에러
                 break;
         }
-        return b.type;
+        return b.type; // 이항연산의 타입 리턴
     }
 
-    // (2) Unary Type Check Implementation
+    /**
+     * (2) Unary Type Check Implementation
+     * 체크 함수를 통해 수식에 맞는 타입을 불러옴
+     * 단항 연산자 확인
+     *   NOT 연산자의 경우 수식의 타입이 boolean 이어야함.
+     *     참이면 boolean타입 대입
+     *   음수(-) 연산자의 경우 수식의 타입이 int 이어야함
+     *     참이면 int타입 대입
+     *   아닐 경우에는 에러 호출
+     * @return Type
+     */
     static Type Check(Unary u, TypeEnv te) {
-        Type t1 = Check(u.expr, te);
-        switch (u.op.val) {
-            case "!":
-                if(t1==Type.BOOL) u.type = Type.BOOL;
-                else error(u, "! has non-bool operand");
+        Type t = Check(u.expr, te); // 수식의 타입
+        switch (u.op.val) { // 단항연산의 연산자 비교
+            case "!": // NOT
+                if(t==Type.BOOL) u.type = Type.BOOL; // 타입비교 후 참이면 boolean타입 대입
+                else error(u, "! has non-bool operand"); // 거짓이면 에러
                 break;
-            case "-":
-                if(t1==Type.INT) u.type = Type.INT;
-                else error(u, "Unary -has non-int operand");
+            case "-": // 음수
+                if(t==Type.INT) u.type = Type.INT; // 타입비교 후 참이면 int타입 대입
+                else error(u, "Unary -has non-int operand"); // 거짓이면 에러
                 break;
-
         }
-        return u.type;
+        return u.type; // 단항연산의 타입 리턴
     }
 
 
@@ -196,74 +212,131 @@ public class TypeChecker {
         return r.type;
     }
 
-    // (3) Assignment Type Check Implementation
+    /**
+     * (3) Assignment Type Check Implementation
+     * 먼저 대입문의 id가 stack(TypeEnv)에 없다면 에러 호출
+     * 대입문에 사용되는 id와 수식의 타입을 가져옴
+     * 두 개의 타입이 같다면 대입문의 타입을 void로 설정
+     * 아니라면 에러를 호출한다.
+     * 마지막으로 대입문의 타입을 리턴한다.
+     * @return Type
+     */
     static Type Check(Assignment a, TypeEnv te) {
-        if (!te.contains(a.id)) {
-            error(a, "undefined variable in assignment: " + a.id);
-            return Type.ERROR;
+        if (!te.contains(a.id)) { // 대입문의 id가 typeEnv에 없다면
+            error(a, "undefined variable in assignment: " + a.id); // 에러
+            return Type.ERROR; // 에러 타입 리턴
         }
-        Type t1 = te.get(a.id);
-        Type t2 = Check(a.expr, te);
-        if(t1==t2) a.type = Type.VOID;
-        else error(a, "mixed mode assignment to " + a.id);
-        return a.type;
+        Type t1 = te.get(a.id); // 대입문 id에 해당하는 타입 가져옴
+        Type t2 = Check(a.expr, te); // 대입문의 수식의 타입을 체크
+        if(t1==t2) a.type = Type.VOID; // 두 타입이 같다면 대입문의 타입에 void 대입
+        else error(a, "mixed mode assignment to " + a.id); // 아니라면 에러 호출
+        return a.type; // 대입문의 타입 리턴
     }
 
-    // (4) If Type Check Implementation
+    /**
+     * (4) If Type Check Implementation
+     * 비교문, 실행될 복합문 세 개의 타입을 받아옴.
+     * 비교문의 타입이 boolean타입인지 확인
+     *   참이면 두 복합문의 타입이 같은지 확인
+     *     참이면 if문의 타입을 stmt의 타입으로 설정
+     *     거짓이면 에러 호출
+     *   거짓이면 에러 호출
+     * if문의 타입 리턴
+     * @return Type
+     */
     static Type Check(If c, TypeEnv te) {
-        Type t = Check(c.expr, te);
-        Type t1 = Check(c.stmt1, te);
-        Type t2 = Check(c.stmt2, te);
-        if (t == Type.BOOL) {
-            if(t1 == t2) c.type = t1;
-            else error(c, "non-equal type in two branches");
-        } else error(c, "non-bool test in condition");
-        return c.type;
+        Type t = Check(c.expr, te); // 비교문의 타입
+        Type t1 = Check(c.stmt1, te); // 실행될 stmt 타입
+        Type t2 = Check(c.stmt2, te); // 실행될 stmt 타입
+        if (t == Type.BOOL) { // t의 타입 비교
+            if(t1 == t2) c.type = t1; // t1,t2가 같은지 비교, 참이면 if문 타입 설정
+            else error(c, "non-equal type in two branches"); // 아니면 에러호출
+        } else error(c, "non-bool test in condition"); // 아니면 에러호출
+        return c.type; // 설정된 if문 타입 리턴
     }
 
-    // (5) While Type Check Implementation
+    /**
+     * (5) While Type Check Implementation
+     * 비교문, 실행될 복합문 두 개의 타입을 받아옴.
+     * 비교문의 타입이 boolean타입인지 확인
+     *   참이면 복합문의 타입이 void인지 확인
+     *     참이면 while문의 타입에 대입
+     *     거짓이면 에러 호출
+     *   거짓이면 에러 호출
+     * while 문의 타입 리턴
+     * @return Type
+     */
     static Type Check(While l, TypeEnv te) {
-        Type t = Check(l.expr, te);
-        Type t1 = Check(l.stmt, te);
-        if (t == Type.BOOL) {
-            if(t1 == Type.VOID) l.type = t1;
-            else error(l,"return in loop..");
-        } else error(l, "non-bool test in loop");
-        return l.type;
-    }
-    static Type Check(For f, TypeEnv te) {
-        Decls decls = new Decls(f.decl);
-        addType(decls, te);
-        Type t = Check(f.expr, te);
-        Type t1 = Check(f.assignment, te);
-        Type t2 = Check(f.stmt, te);
-        if (t == Type.BOOL) {
-            if(t1 == Type.VOID) {
-                if(t2 == Type.VOID) f.type = t2;
-                else error(f,"return in loop..");
-            }else error(f,"undefined variable in assignment");
-        } else error(f, "non-bool test in loop");
-        deleteType(decls, te);
-        return f.type;
+        Type t = Check(l.expr, te); // 비교문의 타입
+        Type t1 = Check(l.stmt, te); // 실행될 stmt 타입
+        if (t == Type.BOOL) { // t의 타입비교
+            if(t1 == Type.VOID) l.type = t1; // t1의 타입비교, 참이면 while문 타입 설정
+            else error(l,"return in loop.."); // 아니면 에러 호출
+        } else error(l, "non-bool test in loop"); // 아니면 에러 호출
+        return l.type; // 설정된 while문 타입 리턴
     }
 
-    // (6) Stmts Type Check Implementation
+    /**
+     * (6) Stmts Type Check Implementation
+     * 먼저 void타입 선언 뒤 파라미터로 들어온 복합문들의 타입을 하나씩 비교
+     * 복합문의 타입이 Void이고 인덱스가 올바른지 확인
+     *   아니라면 에러 호출
+     * 반복문들의 타입이 에러 타입이 아니라면 stmts타입에 void 타입 설정
+     * @return Type
+     */
     static Type Check(Stmts ss, TypeEnv te) {
-        Type t = Type.VOID;
-        for (int i = 0; i < ss.stmts.size(); i++) {
-            t = Check(ss.stmts.get(i), te);
-            if(t!= Type.VOID && i != ss.stmts.size()-1) error(ss, "return in Stmts");
-        }
-        if(ss.type != Type.ERROR) ss.type = t;
-        return ss.type;
+        Type t = Type.VOID; // Void 타입 선언
+        for (int i = 0; i < ss.stmts.size(); i++) { // stmt의 개수만큼 반복
+            t = Check(ss.stmts.get(i), te); // index에 해당하는 stmt 타입가져옴
+            if(t!= Type.VOID && i != ss.stmts.size()-1) error(ss, "return in Stmts");// 비교 후 에러 호출
+        } // 반복문 종료
+        if(ss.type != Type.ERROR) ss.type = t; // stmts의 타입이 에러가 아니라면 먼저 선언된 타입 대입
+        return ss.type; // stmts의 타입 리턴
     }
 
-    // (7) Let Type Check Implementation
+    /**
+     * (7) Let Type Check Implementation
+     * 대입문에 사용되는 타입을 stack(TypeEnv)에 추가한다.
+     * let문의 타입은 안에 있는 복합문의 타입을 체크한뒤 넣는다.
+     * 선언문 종료 시 선언된 타입을 제거한다.
+     * @return Type
+     */
     static Type Check(Let l, TypeEnv te) {
-        addType(l.decls, te);
-        l.type = Check(l.stmts, te);
-        deleteType(l.decls, te);
-        return l.type;
+        addType(l.decls, te); // 선언문 타입 추가
+        l.type = Check(l.stmts, te); // 복합문 타입으로 설정 void
+        deleteType(l.decls, te); // 선언된 타입 제거
+        return l.type; // let문 타입 리턴
+    }
+
+    /**
+     * (8) For Type Check Implementation
+     * for문에서 사용되는 변수는 하나이므로 decls 클래스에 담아 생성.
+     * for문에서 사용되는 타입 추가 및 다른 문 의 타입 체크
+     * 비교문(수식)의 타입이 boolean타입인지 확인
+     *   참이면 대입문의 타입이 void인지 확인
+     *     참이면 복합문의 타입이 void인지 확인
+     *       참이면 for의 타입에 대입
+     *       거짓이면 에러 호출
+     *     거짓이면 에러 호출
+     *   거짓이면 에러 호출
+     * for문에서 사용된 변수 타입 stack에서 제거
+     * for문의 타입 리턴
+     * @return Type
+     */
+    static Type Check(For f, TypeEnv te) {
+        Decls decls = new Decls(f.decl); // for문에 있는 decl을 decls에 담음
+        addType(decls, te); // 선언문의 타입 stack에 저장
+        Type t = Check(f.expr, te); // 수식의 타입 체크
+        Type t1 = Check(f.assignment, te); // 대입문 타입 체크
+        Type t2 = Check(f.stmt, te); // 복합문 타입 체크
+        if (t == Type.BOOL) { // 수식의 타입 체크
+            if(t1 == Type.VOID) { // 대입문 타입 체크
+                if(t2 == Type.VOID) f.type = t2; // 복합문 타입체크 후 for문에 타입 대입
+                else error(f,"return in loop.."); // 거짓이면 에러호출
+            }else error(f,"undefined variable in assignment"); // 거짓이면 에러호출
+        } else error(f, "non-bool test in loop"); // 거짓이면 에러호출
+        deleteType(decls, te); // for문에서 사용된 타입 stack에서 제거
+        return f.type;
     }
 
     static Type Check(Raise r, TypeEnv te) {
@@ -318,7 +391,6 @@ public class TypeChecker {
         if (ds != null)
             for (Decl decl : ds)
                 Check(decl, te);
-
         return te;
     }
 
