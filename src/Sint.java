@@ -258,13 +258,12 @@ public class Sint {
 
     // Allocate for Function Implementation (Optional)
     State allocate (Decls ds, Functions fs, State state) {
-        // Allocate Implementation
-        return null;
+        return state; // 변환된 상태 리턴
     }
-    // Free for Function Implementation (Optional)
+    // Free for Function Implementation (Optional)ㅔ
     State free (Decls ds, Functions fs, State state) {
-        return null;
         // Free Implementation
+        return state;
     }
 
 
