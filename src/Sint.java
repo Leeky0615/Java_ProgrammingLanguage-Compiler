@@ -20,9 +20,7 @@ public class Sint {
 	    }
 
 	    if (c instanceof Function) {
-	        Function f = (Function) c;
-	        state.push(f.id, new Value(f));
-	        return state;
+	        return allocate(null, new Functions((Function) c),state);
 	    }
 
 	    if (c instanceof Stmt)
@@ -93,7 +91,7 @@ public class Sint {
 
         state.push(new Identifier("barrier"), null); // barrier 
 	    // activate a new stack frame in the stack
-        state = allocate(f.params, state);
+        state = allocate(f.params, new Functions(f), state);
         i = 0;
         for (Decl d : f.params) { // pass by value
             Identifier v = d.id;
@@ -104,7 +102,7 @@ public class Sint {
 
     State deleteFrame (State state, Call c, Function f) {
 	// free a stack frame from the stack
-        if (f.params != null) state  = free(f.params, state);
+        state = free(f.params, new Functions(f), state);
         state.pop(); // pop barrier
         return state;
     }
@@ -217,12 +215,13 @@ public class Sint {
      * @return State
      */
     State allocate (Decls ds, State state) {
-        for (Decl d : ds) { // decl을 반목문으로 돌림
-            if(d.expr == null) // decl의 expr이 없다면
-                state.push(d.id, V(new Value(d.type),state)); // decl의 타입에 맞는 value를 생성해 stack에 push
-            else  // expr이 있다면
-                state.push(d.id, V(d.expr,state)); // state에 expr을 계산한 값 push
-        } // 반복문 종료
+        if(ds != null) // Decls가 있다면
+            for (Decl d : ds) { // decl을 반목문으로 돌림
+                if(d.expr == null) // decl의 expr이 없다면
+                    state.push(d.id, V(new Value(d.type),state)); // decl의 타입에 맞는 value를 생성해 stack에 push
+                else  // expr이 있다면
+                    state.push(d.id, V(d.expr,state)); // state에 expr을 계산한 값 push
+            } // 반복문 종료
         return state; // 변환된 상태 리턴
     }
 
@@ -233,7 +232,8 @@ public class Sint {
      * @return State
      */
     State free (Decls ds, State state) {
-        for (Decl d : ds) state.pop(); // 반복문을 돌면서 state에서 pop
+        if(ds != null) // Decls가 있다면
+            for (Decl d : ds) state.pop(); // 반복문을 돌면서 state에서 pop
         return state;
     }
 
@@ -256,14 +256,52 @@ public class Sint {
         return free(decls, s); // decls 해제
     }
 
-    // Allocate for Function Implementation (Optional)
+    /**
+     * Allocate for Function Implementation (Optional)
+     * 함수에서 사용되는 allocate
+     * 1. 함수 정의
+     *   매개변수로 Functions,state만 들어온다. -> Decls == null
+     * 2. 함수 호출 -> Frame 생성
+     *   매개변수로 Decls,Functions,state가 들어온다. -> Decls == Function.params
+     * 먼저 들어온 함수리스트가 null이 아닌지 확인한 다음 모든 함수에 대해서
+     * 선언문(Decls)가 null 이라면 1번 함수정의인 경우 => 함수의 id와 AST를 push해준다.
+     * 선언문(Decls)가 null이 아니고 선언문과 들어온 함수의 params가 같다면 2번 함수호출인 경우
+     *   => 다시 자기자신(Sint.class)의 선언문할당(allocate)함수를 호출한다.
+     *   => 이때 들어가는 매개변수 decls은 가독성을 위해 ds대신 f.params로 넣는다.
+     * 마지막으로 변환된 상태를 리턴한다.
+     * @return State
+     */
     State allocate (Decls ds, Functions fs, State state) {
+        if (fs != null) // Function이 있다면
+            for (Function f : fs) { // 모든 Function에 대해서
+                // 함수 정의용 allocate (decls가 null로 들어옴)
+                if (ds == null) state.push(f.id, new Value(f)); // 함수 id와 AST를 넣음
+
+                // 함수 호출용 allocate :: decls가 null이 아니고, Function의 params와 같다면
+                // Sint.class의 allocate 호출(parameter = f.params(ds))
+                if (ds!= null && ds.equals(f.params)) state = this.allocate(f.params, state);
+            }
         return state; // 변환된 상태 리턴
     }
-    // Free for Function Implementation (Optional)ㅔ
+
+    /**
+     * Free for Function Implementation (Optional)
+     * 함수에서 사용되는 free
+     * delete frame인 경우
+     * -> 매개변수로 들어온 Functions가 null이 아닌지 확인 후 모든 함수에 대해서 체크한다.
+     *    매개변수로 들어온 Decls와 함수의 params가 같다면
+     *    다시 자기자신(Sint.class)의 free 함수를 호출한다.
+     * => 이때 들어가는 매개변수 decls은 가독성을 위해 ds대신 f.params로 넣는다.
+     * 마지막으로 변환된 상태를 리턴한다.
+     * @return State
+     */
     State free (Decls ds, Functions fs, State state) {
-        // Free Implementation
-        return state;
+        if(fs != null) // Function이 있다면
+            for (Function f : fs) { // 모든 Function에 대해서
+                if(ds!= null && ds.equals(f.params)) // decls가 null이 아니고, Function의 params와 같다면
+                    state = this.free(f.params, state); // Sint.class의 free 호출(parameter = f.params(ds))
+            }
+        return state; // 변환된 상태 리턴
     }
 
 
