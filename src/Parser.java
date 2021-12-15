@@ -278,7 +278,23 @@ public class Parser {
         Stmt s = stmt(); // 조건에 만족 할 경우 수행될 stmt 파싱
         return new While(e,s); // while문 AST를 생성해 리턴
     }
-
+    /**
+     * [PLUS] For Parser Implementation
+     * Syntax : <forStmt> -> for (<decl>;<expr>;<assignment>) <stmt>
+     * @return For.class ['new For(e,s)']
+     */
+    private For forStmt() {
+        // <forStmt> -> Decl decl; Expr expr; Assignment assignment; Stmt stmt;
+        match(Token.FOR); // 'for' 토큰 매칭
+        match(Token.LPAREN); // '(' 토큰 매칭
+        Decl d = decl(); // 반복문에 사용될 선언문 파싱
+        Expr e = expr(); // 반복문에 사용될 비교문 파싱
+        match(Token.SEMICOLON); // ';' 토큰 매칭
+        Assignment a = assignment(); // 반복문에 사용될 대입문 파싱
+        match(Token.RPAREN); // ')' 토큰 파싱
+        Stmt s = stmt(); // 반복문 내부에서 사용될 복합문 파싱
+        return new For(d,e,a,s); // for문 AST를 생성해 리턴
+    }
 
     private Stmts doStmt() {
         // <doStmt> -> do <stmt> while (<expr>)
@@ -320,18 +336,6 @@ public class Parser {
         Identifier id = new Identifier(match(Token.ID));
         match(Token.SEMICOLON);
         return new Raise(id);
-    }
-    private For forStmt() {
-        // <forStmt> -> Decl decl; Expr expr; Assignment assignment; Stmt stmt;
-        match(Token.FOR);
-        match(Token.LPAREN);
-        Decl d = decl();
-        Expr e = expr();
-        match(Token.SEMICOLON);
-        Assignment a = assignment();
-        match(Token.RPAREN);
-        Stmt s = stmt();
-        return new For(d,e,a,s);
     }
 
     private Expr expr() {

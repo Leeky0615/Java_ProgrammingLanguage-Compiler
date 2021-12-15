@@ -153,6 +153,25 @@ public class Sint {
     }
 
     /**
+     * [PLUS] For Eval Implementation
+     * Syntax : for '('<decl>;<expr>;<assignment>')'<stmt>
+     * for문에서 사용되는 변수는 하나이므로 decls 클래스에 담아 생성.
+     * 변수와 상태를 stack에 할당한다.
+     * 반복문을 돌면서 연산값이 참이면 내부 수식과 대입문으로 상태변환
+     * for문 종료 후 선언된 변수 stack에서 해제
+     * @return State
+     */
+    State Eval(For f, State state){
+        Decls decls = new Decls(f.decl); // for문에 있는 decl을 decls에 담음
+        State s = allocate(decls, state); // decl을 allocate 한 뒤 상태 저장
+        while (V(f.expr,s).boolValue()) { // for문의 expr이 참이면
+            s = Eval(f.stmt, s); // stmt문으로 상태변환
+            s = Eval(f.assignment, s); // assignment문으로 상태변환
+        }
+        return free(decls, s); // decls 해제
+    }
+
+    /**
      * (4) Let Eval Implementation
      * Syntax : let <decls> in <stmts> end
      * let -> 현재 상태에 decls 선언문에 있는 id를 allocate함.
@@ -237,24 +256,7 @@ public class Sint {
         return state;
     }
 
-    /**
-     * (9) For Eval Implementation
-     * Syntax : for '('<decl>;<expr>;<assignment>')'<stmt>
-     * for문에서 사용되는 변수는 하나이므로 decls 클래스에 담아 생성.
-     * 변수와 상태를 stack에 할당한다.
-     * 반복문을 돌면서 연산값이 참이면 내부 수식과 대입문으로 상태변환
-     * for문 종료 후 선언된 변수 stack에서 해제
-     * @return State
-     */
-    State Eval(For f, State state){
-        Decls decls = new Decls(f.decl); // for문에 있는 decl을 decls에 담음
-        State s = allocate(decls, state); // decl을 allocate 한 뒤 상태 저장
-        while (V(f.expr,s).boolValue()) { // for문의 expr이 참이면
-            s = Eval(f.stmt, s); // stmt문으로 상태변환
-            s = Eval(f.assignment, s); // assignment문으로 상태변환
-        }
-        return free(decls, s); // decls 해제
-    }
+
 
     /**
      * Allocate for Function Implementation (Optional)

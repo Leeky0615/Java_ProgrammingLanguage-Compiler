@@ -159,6 +159,28 @@ class While extends Stmt {
         this.stmt = s;
     }
 }
+
+/**
+ * [PLUS] For AST Implementation / for 문
+ * Super Class : Stmt
+ * Attributes : Decl decl; Expr expr; Assignment assignment, Stmt stmt;
+ * Syntax : for '('<decl>;<expr>;<assignment>')'<stmt>
+ * AST : Decl Expr Assignment Stmt
+ * Example : for(int i = 0; i < 5; i = i + 1;) { x = x + i; }
+ */
+class For extends Stmt {
+    Decl decl;
+    Expr expr;
+    Assignment assignment;
+    Stmt stmt;
+
+    public For(Decl d, Expr e, Assignment a, Stmt s) {
+        this.decl = d;
+        this.expr = e;
+        this.assignment = a;
+        this.stmt = s;
+    }
+}
 /**
  * (6) Let AST Implementation / Let 문
  * Super Class : Stmt
@@ -204,28 +226,6 @@ class Read extends Stmt {
 class Print extends Stmt {
     Expr expr;
     public Print(Expr e) {this.expr = e;}
-}
-
-/**
- * (9) For AST Implementation / for 문
- * Super Class : Stmt
- * Attributes : Decl decl; Expr expr; Assignment assignment, Stmt stmt;
- * Syntax : for '('<decl>;<expr>;<assignment>')'<stmt>
- * AST : Decl Expr Assignment Stmt
- * Example : for(int i = 0; i < 5; i = i + 1;) { x = x + i; }
- */
-class For extends Stmt {
-    Decl decl;
-    Expr expr;
-    Assignment assignment;
-    Stmt stmt;
-
-    public For(Decl d, Expr e, Assignment a, Stmt s) {
-        this.decl = d;
-        this.expr = e;
-        this.assignment = a;
-        this.stmt = s;
-    }
 }
 
 class Return extends Stmt {

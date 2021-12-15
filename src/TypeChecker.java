@@ -277,6 +277,36 @@ public class TypeChecker {
     }
 
     /**
+     * [PLUS] For Type Check Implementation
+     * for문에서 사용되는 변수는 하나이므로 decls 클래스에 담아 생성.
+     * for문에서 사용되는 타입 추가 및 다른 문 의 타입 체크
+     * 비교문(수식)의 타입이 boolean타입인지 확인
+     *   참이면 대입문의 타입이 void인지 확인
+     *     참이면 복합문의 타입이 void인지 확인
+     *       참이면 for의 타입에 대입
+     *       거짓이면 에러 호출
+     *     거짓이면 에러 호출
+     *   거짓이면 에러 호출
+     * for문에서 사용된 변수 타입 stack에서 제거
+     * for문의 타입 리턴
+     * @return Type
+     */
+    static Type Check(For f, TypeEnv te) {
+        Decls decls = new Decls(f.decl); // for문에 있는 decl을 decls에 담음
+        addType(decls, te); // 선언문의 타입 stack에 저장
+        Type t = Check(f.expr, te); // 수식의 타입 체크
+        Type t1 = Check(f.assignment, te); // 대입문 타입 체크
+        Type t2 = Check(f.stmt, te); // 복합문 타입 체크
+        if (t == Type.BOOL) { // 수식의 타입 체크
+            if(t1 == Type.VOID) { // 대입문 타입 체크
+                if(t2 == Type.VOID) f.type = t2; // 복합문 타입체크 후 for문에 타입 대입
+                else error(f,"return in loop.."); // 거짓이면 에러호출
+            }else error(f,"undefined variable in assignment"); // 거짓이면 에러호출
+        } else error(f, "non-bool test in loop"); // 거짓이면 에러호출
+        deleteType(decls, te); // for문에서 사용된 타입 stack에서 제거
+        return f.type;
+    }
+    /**
      * (6) Stmts Type Check Implementation
      * 먼저 void타입 선언 뒤 파라미터로 들어온 복합문들의 타입을 하나씩 비교
      * 복합문의 타입이 Void이고 인덱스가 올바른지 확인
@@ -308,36 +338,6 @@ public class TypeChecker {
         return l.type; // let문 타입 리턴
     }
 
-    /**
-     * (8) For Type Check Implementation
-     * for문에서 사용되는 변수는 하나이므로 decls 클래스에 담아 생성.
-     * for문에서 사용되는 타입 추가 및 다른 문 의 타입 체크
-     * 비교문(수식)의 타입이 boolean타입인지 확인
-     *   참이면 대입문의 타입이 void인지 확인
-     *     참이면 복합문의 타입이 void인지 확인
-     *       참이면 for의 타입에 대입
-     *       거짓이면 에러 호출
-     *     거짓이면 에러 호출
-     *   거짓이면 에러 호출
-     * for문에서 사용된 변수 타입 stack에서 제거
-     * for문의 타입 리턴
-     * @return Type
-     */
-    static Type Check(For f, TypeEnv te) {
-        Decls decls = new Decls(f.decl); // for문에 있는 decl을 decls에 담음
-        addType(decls, te); // 선언문의 타입 stack에 저장
-        Type t = Check(f.expr, te); // 수식의 타입 체크
-        Type t1 = Check(f.assignment, te); // 대입문 타입 체크
-        Type t2 = Check(f.stmt, te); // 복합문 타입 체크
-        if (t == Type.BOOL) { // 수식의 타입 체크
-            if(t1 == Type.VOID) { // 대입문 타입 체크
-                if(t2 == Type.VOID) f.type = t2; // 복합문 타입체크 후 for문에 타입 대입
-                else error(f,"return in loop.."); // 거짓이면 에러호출
-            }else error(f,"undefined variable in assignment"); // 거짓이면 에러호출
-        } else error(f, "non-bool test in loop"); // 거짓이면 에러호출
-        deleteType(decls, te); // for문에서 사용된 타입 stack에서 제거
-        return f.type;
-    }
 
     static Type Check(Raise r, TypeEnv te) {
         Type t = Check(r.eid,te);
